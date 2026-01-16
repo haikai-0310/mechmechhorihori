@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>メカメカほりほり | 化石図鑑</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #5D4037;
+            --accent: #FFAB00; 
+            --pop: #FF7043;
+            --bg-color: #EFEBE9;
+            --shelf-bg: #8D6E63;
+            --shelf-shadow: #5D4037;
+            --text-dark: #3E2723;
+        }
+
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#D7CCC8 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-dark);
+            margin: 0; padding: 0; line-height: 1.8;
+            padding-top: 60px;
+            overflow-x: hidden;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; padding: 20px 15px 80px; box-sizing: border-box; }
+
+        /* ヘッダー */
+        .site-header {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 1000;
+            padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;
+        }
+        
+        .header-logo { 
+            display: flex; align-items: center; 
+            text-decoration: none; cursor: pointer; 
+        }
+        .header-logo img {
+            height: 36px;
+            width: auto;
+            margin-right: 8px;
+        }
+        .header-logo span {
+            font-weight: 900; 
+            color: var(--primary); 
+            font-size: 1.1rem;
+        }
+
+        /* ヒーローエリア */
+        .hero-area { text-align: center; padding: 30px 0 20px; }
+        .hero-copy {
+            display: block; font-size: 1.5rem; font-weight: 900; color: var(--pop);
+            margin-bottom: 20px; letter-spacing: 0.05em; text-shadow: 2px 2px 0 #fff;
+            line-height: 1.4;
+        }
+        
+        .hero-logo-box {
+            display: inline-block; padding: 10px 30px; border-radius: 15px;
+            background: #fff; box-shadow: 6px 6px 0 var(--accent);
+            border: 4px solid var(--primary); transform: rotate(-2deg);
+            margin-bottom: 15px;
+        }
+        .hero-logo-box h1 { margin: 0; font-size: 2.2rem; color: var(--primary); letter-spacing: 0.05em; line-height: 1.2; }
+
+        /* 棚エリア */
+        .shelf-container {
+            background: var(--shelf-bg);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2), 0 10px 0 var(--shelf-shadow);
+            margin-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .shelf-container::before {
+            content: "COLLECTION";
+            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background: #4E342E; color: #fff; padding: 2px 15px; font-size: 0.8rem; border-radius: 10px; font-weight: bold;
+            z-index: 5;
+        }
+
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px 10px;
+        }
+
+        .fossil-item {
+            background: #fff;
+            border-radius: 8px;
+            aspect-ratio: 1 / 1;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid #D7CCC8;
+            transition: transform 0.2s;
+            overflow: visible; 
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        @media (hover: hover) {
+            .fossil-item:hover {
+                transform: scale(1.05);
+                z-index: 100;
+                border-color: var(--pop);
+            }
+        }
+        .fossil-item:active { transform: scale(0.95); }
+
+        .fossil-item.locked { background: #ECEFF1; }
+        .fossil-item.locked img {
+            filter: brightness(0) opacity(0.2);
+            transform: scale(0.8);
+        }
+        .fossil-item.locked::after {
+            content: "?"; position: absolute; font-size: 2rem;
+            color: rgba(0,0,0,0.1); font-weight: 900;
+            pointer-events: none;
+        }
+
+        .fossil-item.unlocked {
+            border-color: var(--accent);
+            background: #FFF8E1;
+        }
+        .fossil-item.unlocked img {
+            animation: pukaPuka 3s ease-in-out infinite;
+        }
+        
+        .fossil-item.selected {
+            border-color: var(--pop);
+            box-shadow: 0 0 0 4px rgba(255, 112, 67, 0.3);
+            background: #fff;
+        }
+
+        .fossil-item.coming-soon { background: #D7CCC8; cursor: default; }
+        .coming-text { font-size: 0.7rem; font-weight: bold; color: #fff; text-align: center; opacity: 0.7; }
+        .fossil-img { width: 70%; height: 70%; object-fit: contain; position: relative; z-index: 1; }
+
+        @keyframes pukaPuka {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-5px) scale(1.05); }
+        }
+
+        @keyframes flashEffect {
+            0% { background-color: #fff; box-shadow: 0 0 50px #fff; }
+            100% { background-color: #FFF8E1; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        }
+        .just-unlocked { animation: flashEffect 0.6s ease-out forwards; }
+
+        /* キラキラ */
+        .sparkle-particle {
+            position: absolute; top: 50%; left: 50%; width: 15px; height: 15px;
+            background: radial-gradient(circle, #fff 20%, #FFD700 100%);
+            border-radius: 50%; pointer-events: none; z-index: 999;
+            transform: translate(-50%, -50%) scale(0); opacity: 0;
+            animation: sparkleFly 0.8s ease-out forwards;
+        }
+        @keyframes sparkleFly {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 1; }
+            50% { opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1.5) rotate(180deg); opacity: 0; }
+        }
+
+        /* ツールチップ */
+        .tooltip-box {
+            position: absolute; bottom: 105%; left: 50%; transform: translateX(-50%) scale(0.8);
+            opacity: 0; pointer-events: none;
+            background: rgba(255, 255, 255, 0.98); color: #333;
+            padding: 8px; border-radius: 8px; width: 140px; text-align: center;
+            font-size: 0.75rem; font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 3px solid var(--pop);
+            z-index: 200; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); transform-origin: center bottom;
+        }
+        .tooltip-box::after {
+            content: ""; position: absolute; top: 100%; left: 50%; margin-left: -8px;
+            border-width: 8px; border-style: solid; border-color: var(--pop) transparent transparent transparent;
+        }
+        .fossil-item:hover .tooltip-box { transform: translateX(-50%) scale(1); opacity: 1; bottom: 110%; }
+
+
+        /* --- 詳細エリア --- */
+        .detail-section {
+            display: none;
+            margin-top: 30px;
+            background: #fff;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border: 4px solid var(--primary);
+            animation: slideUp 0.5s ease-out;
+            text-align: center;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .detail-title {
+            font-size: 1.8rem; margin: 0 0 20px; color: var(--primary);
+            border-bottom: 2px dashed #D7CCC8; padding-bottom: 10px;
+        }
+        .detail-image-box {
+            background: #FFF8E1; border-radius: 10px; padding: 20px;
+            display: inline-block; margin-bottom: 20px;
+            border: 2px solid var(--accent);
+        }
+        .detail-img-large {
+            max-width: 100%; height: auto; max-height: 200px;
+            filter: drop-shadow(0 4px 0 rgba(0,0,0,0.1));
+            animation: pukaPuka 4s ease-in-out infinite;
+        }
+
+        .detail-table {
+            width: 100%; border-collapse: collapse; margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        .detail-table th {
+            background: var(--primary); color: #fff; padding: 8px;
+            border: 1px solid var(--primary); width: 30%;
+        }
+        .detail-table td {
+            background: #fff; padding: 8px; border: 1px solid #D7CCC8;
+            color: var(--text-dark); font-weight: bold;
+        }
+
+        .detail-desc-text {
+            text-align: left; background: #EFEBE9; padding: 15px;
+            border-radius: 8px; font-size: 0.9rem; line-height: 1.8;
+            border-left: 5px solid var(--pop);
+        }
+
+        /* --- UIパーツ --- */
+        .scroll-top-btn {
+            position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px;
+            background: var(--pop); color: #fff; border: none; border-radius: 50%;
+            font-size: 1.5rem; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer; z-index: 900; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.2s;
+        }
+        .scroll-top-btn.show { opacity: 1; pointer-events: auto; }
+        .scroll-top-btn:active { transform: scale(0.9); }
+
+        /* --- デバッグモード（フローティングウィンドウ化） --- */
+        .debug-area {
+            display: none; 
+            /* 画面に固定して浮かせる */
+            position: fixed; 
+            bottom: 20px; 
+            left: 20px; 
+            width: 320px;
+            
+            text-align: center; padding: 0; /* paddingは内部コンテナで調整 */
+            background: #fff; border: 2px solid #546E7A; border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 3000; /* 他の要素より手前に */
+            overflow: hidden;
+        }
+        
+        /* 持ち手（ハンドル）部分 */
+        .debug-header {
+            background: #546E7A;
+            color: #fff;
+            padding: 8px;
+            cursor: move; /* カーソルを移動マークに */
+            font-weight: bold;
+            font-size: 0.9rem;
+            user-select: none; /* 文字選択防止 */
+        }
+
+        .debug-content {
+            padding: 15px;
+        }
+
+        .debug-btn { 
+            margin: 3px; padding: 6px 10px; border: none; background: #78909C; color: #fff; border-radius: 5px; cursor: pointer; font-size: 0.8rem;
+        }
+        .debug-reset { background: #E65100; font-weight:bold; width: 100%; margin: 5px 0; }
+        .debug-close { background: #d32f2f; margin-top: 10px; width: 100%; }
+
+        .toast {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7); color: white; padding: 8px 16px; border-radius: 20px;
+            font-size: 0.85rem; z-index: 4000; opacity: 0; transition: opacity 0.3s; pointer-events: none;
+        }
+        .toast.show { opacity: 1; }
+
+        footer { background: #4E342E; color: #D7CCC8; padding: 20px; text-align: center; font-size: 0.7rem; margin-top: 40px; }
+    </style>
+</head>
+<body>
+
+<header class="site-header">
+    <a href="#" class="header-logo" id="top-logo">
+        <img src="images/lab.png" alt="ラボのアイコン">
+        <span>メカメカほりほり</span>
+    </a>
+</header>
+
+<div class="container">
+    <div class="hero-area">
+        <div class="hero-logo-box"><h1>化石図鑑</h1></div><br>
+        <span class="hero-copy">掘り出せ！未来のエンジニア！</span>
+        <span class="concept">すべての化石を集めよう！</span>
+    </div>
+
+    <div class="shelf-container">
+        <div class="collection-grid" id="grid-container"></div>
+    </div>
+
+    <div id="detail-section" class="detail-section">
+        <h2 id="dino-info-name" class="detail-title">恐竜の名前</h2>
+        
+        <div class="detail-image-box">
+            <img id="dino-info-img" src="" class="detail-img-large" alt="">
+        </div>
+
+        <table class="detail-table">
+            <tr>
+                <th>名前の由来</th>
+                <td id="dino-info-name-origin">-</td>
+            </tr>
+            <tr>
+                <th>大きさ</th>
+                <td id="dino-info-size">-</td>
+            </tr>
+            <tr>
+                <th>重さ</th>
+                <td id="dino-info-weight">-</td>
+            </tr>
+            <tr>
+                <th>分類</th>
+                <td id="dino-info-class">-</td>
+            </tr>
+            <tr>
+                <th>時代</th>
+                <td id="dino-info-era">-</td>
+            </tr>
+            <tr>
+                <th>産出国</th>
+                <td id="dino-info-origin">-</td>
+            </tr>
+        </table>
+
+        <div id="dino-info-desc" class="detail-desc-text">
+            ここに詳しい説明が入ります。
+        </div>
+    </div>
+
+    <div class="debug-area" id="debug-section">
+        <div class="debug-header" id="debug-drag-handle">🛠 開発者モード (Move Me)</div>
+        
+        <div class="debug-content">
+            <div style="margin-bottom:5px;">
+                <button class="debug-btn" onclick="simulateNFC('ammonite')">アンモ</button>
+                <button class="debug-btn" onclick="simulateNFC('trilobite')">三葉虫</button>
+                <button class="debug-btn" onclick="simulateNFC('spino')">スピノ</button>
+                <button class="debug-btn" onclick="simulateNFC('fukuiraptor')">フクイ</button>
+                <button class="debug-btn" onclick="simulateNFC('trex')">ティラノ</button>
+            </div>
+            <button class="debug-btn debug-reset" onclick="resetCollection()">↻ 図鑑をリセット</button>
+            <button class="debug-btn debug-close" onclick="disableDebugMode()">終了する</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<button id="scroll-top-btn" class="scroll-top-btn">▲</button>
+
+<footer>
+    <span id="copyright-trigger" style="user-select: none;">© 2026 MECHAMECHA HORIHORI</span>
+</footer>
+
+<audio id="sfx-sparkle" src="sparkle.mp3" preload="auto"></audio>
+
+<script>
+    const fossils = [
+        { 
+            id: 'ammonite', name: 'アンモナイト', img: 'images/ammonite.jpg', 
+            hint: 'ぐるぐるしている…<br>海にいたらしい', 
+            desc: '【アンモナイト】<br>クリックで詳細を見る',
+            data: {
+                nameOrigin: 'アモン（エジプトの神）の角',
+                size: '数cm 〜 2m',
+                weight: '数g 〜 数十kg',
+                class: '頭足類（イカ・タコの仲間）',
+                era: 'デボン紀 〜 白亜紀',
+                origin: '世界中',
+                longDesc: '渦巻き状の殻を持っていた海の生き物だよ。恐竜が生きていた時代よりずっと前から、恐竜がいなくなるまで、長い間世界中の海で繁栄していたんだ。殻の中にガスや水を入れて、海の中をフワフワと漂っていたと考えられているよ。'
+            }
+        },
+        { 
+            id: 'spino', name: 'スピノサウルス', img: 'images/spinosaurus.jpg',
+            hint: '水辺で暮らしていた<br>恐竜の歯…？', 
+            desc: '【スピノサウルス】<br>クリックで詳細を見る',
+            data: {
+                nameOrigin: 'トゲトゲのトカゲ',
+                size: '全長 10 〜 18m',
+                weight: '6 〜 9トン',
+                class: '獣脚類（肉食恐竜）',
+                era: '白亜紀（前期）',
+                origin: 'エジプト、モロッコ',
+                longDesc: '背中にある大きな「帆」が特徴的な巨大な肉食恐竜だよ。ワニのように口が細長く、水辺で魚を捕まえて食べていたと考えられているんだ。史上最大級の肉食恐竜のひとつだと言われているよ！'
+            }
+        },
+        { 
+            id: 'trex', name: 'ティラノサウルス', img: 'images/tyrannosaurus.jpg',
+            hint: '最強の恐竜の<br>キバかもしれない…', 
+            desc: '【ティラノサウルス】<br>クリックで詳細を見る',
+            data: {
+                nameOrigin: '暴君トカゲの王',
+                size: '全長 約13m',
+                weight: '6 〜 9トン',
+                class: '獣脚類（肉食恐竜）',
+                era: '白亜紀（後期）',
+                origin: 'アメリカ、カナダ',
+                longDesc: '「暴君トカゲの王」という意味の名前を持つ、もっとも有名な恐竜だね。太くて長い歯と、とてつもなく強いアゴの力で、獲物の骨まで噛み砕いてしまったと言われているよ。嗅覚もとても優れていたんだ。'
+            }
+        },
+        { 
+            id: 'trilobite', name: '三葉虫', img: 'images/trilobite.jpg', 
+            hint: '海の底を<br>はっていたらしい…', 
+            desc: '【三葉虫】<br>クリックで詳細を見る',
+            data: {
+                nameOrigin: '3つの葉（また）',
+                size: '数mm 〜 70cm',
+                weight: 'とっても軽い',
+                class: '節足動物',
+                era: 'カンブリア紀 〜 ペルム紀',
+                origin: '世界中',
+                longDesc: '今のダンゴムシやエビの遠い親戚だよ。体が「左・真ん中・右」の3つの部分に分かれているから「三葉虫」と呼ばれるんだ。恐竜が生まれるよりもずっと昔の海で、大繁栄していた生き物だよ。'
+            }
+        },
+        { 
+            id: 'fukuiraptor', name: 'フクイラプトル', img: 'images/fukuiraptor.jpg',
+            hint: '日本で見つかった<br>肉食恐竜のツメ…？', 
+            desc: '【フクイラプトル】<br>クリックで詳細を見る',
+            data: {
+                nameOrigin: '福井の泥棒',
+                size: '全長 4.2m',
+                weight: '約300kg',
+                class: '獣脚類（メガラプトル類と考えられている）',
+                era: '白亜紀（前期）',
+                origin: '日本（福井県）',
+                longDesc: '日本の福井県勝山市で発見された肉食恐竜だよ！大きな手の爪が特徴なんだ。これを使って獲物を捕まえていたと考えられているよ。日本にもこんなにかっこいい恐竜がいたなんてすごいね！'
+            }
+        },
+        { id: 'coming1', type: 'coming_soon' },
+        { id: 'coming2', type: 'coming_soon' },
+        { id: 'coming3', type: 'coming_soon' },
+        { id: 'coming4', type: 'coming_soon' }
+    ];
+
+    let unlockedStatus = { ammonite: false, spino: false, trex: false, trilobite: false, fukuiraptor: false };
+
+    // セーブデータ読み込み
+    const savedData = localStorage.getItem('mechMechCollection');
+    if (savedData) {
+        try { unlockedStatus = JSON.parse(savedData); } catch(e) {}
+    }
+    function saveStatus() {
+        localStorage.setItem('mechMechCollection', JSON.stringify(unlockedStatus));
+    }
+
+    // --- 初期化処理 ---
+    const gridContainer = document.getElementById('grid-container');
+    const detailSection = document.getElementById('detail-section');
+
+    fossils.forEach(f => {
+        const div = document.createElement('div');
+        div.className = 'fossil-item';
+        div.id = `item-${f.id}`;
+        
+        if (f.type === 'coming_soon') {
+            div.classList.add('coming-soon');
+            div.innerHTML = '<div class="coming-text">COMING<br>SOON<br>...</div>';
+        } else {
+            if (unlockedStatus[f.id]) {
+                div.classList.add('unlocked');
+                div.classList.remove('locked');
+                div.innerHTML = `<img src="${f.img}" class="fossil-img" alt="${f.name}"><div class="tooltip-box" id="tooltip-${f.id}">${f.desc}</div>`;
+            } else {
+                div.classList.add('locked');
+                div.classList.remove('unlocked');
+                div.innerHTML = `<img src="${f.img}" class="fossil-img" alt="${f.name}"><div class="tooltip-box" id="tooltip-${f.id}">${f.hint}</div>`;
+            }
+            
+            div.addEventListener('click', () => {
+                if (unlockedStatus[f.id]) {
+                    showDetails(f.id);
+                } else {
+                    div.style.transform = "translateX(5px)";
+                    setTimeout(() => div.style.transform = "none", 100);
+                }
+            });
+        }
+        gridContainer.appendChild(div);
+    });
+
+    /**
+     * UI操作
+     */
+    function showDetails(id) {
+        const data = fossils.find(f => f.id === id);
+        if (!data) return;
+
+        document.querySelectorAll('.fossil-item').forEach(el => el.classList.remove('selected'));
+        document.getElementById(`item-${id}`).classList.add('selected');
+
+        document.getElementById('dino-info-name').textContent = data.name;
+        
+        const imgEl = document.getElementById('dino-info-img');
+        imgEl.src = data.img;
+        imgEl.alt = data.name;
+        
+        document.getElementById('dino-info-name-origin').textContent = data.data.nameOrigin;
+        document.getElementById('dino-info-size').textContent = data.data.size;
+        document.getElementById('dino-info-weight').textContent = data.data.weight;
+        document.getElementById('dino-info-class').textContent = data.data.class;
+        document.getElementById('dino-info-era').textContent = data.data.era;
+        document.getElementById('dino-info-origin').textContent = data.data.origin;
+        
+        document.getElementById('dino-info-desc').textContent = data.data.longDesc;
+
+        detailSection.style.display = 'block';
+        setTimeout(() => {
+            detailSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    }
+
+    // スムーズスクロール
+    const scrollTopBtn = document.getElementById('scroll-top-btn');
+    const topLogo = document.getElementById('top-logo');
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 200) { scrollTopBtn.classList.add('show'); }
+        else { scrollTopBtn.classList.remove('show'); }
+    });
+    
+    function scrollToTop(e) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    if(scrollTopBtn) scrollTopBtn.addEventListener('click', scrollToTop);
+    if(topLogo) topLogo.addEventListener('click', scrollToTop);
+
+    /**
+     * デバッグ・開発者モード (ドラッグ機能付き)
+     */
+    let tapCount = 0;
+    let tapTimer;
+    const COPYRIGHT_TRIGGER = document.getElementById('copyright-trigger');
+    const DEBUG_SECTION = document.getElementById('debug-section');
+    const DEBUG_HANDLE = document.getElementById('debug-drag-handle');
+
+    if (localStorage.getItem('debugEnabled') === 'true') {
+        DEBUG_SECTION.style.display = 'block';
+    }
+
+    // コピーライト7回タップで起動
+    COPYRIGHT_TRIGGER.addEventListener('click', () => {
+        tapCount++;
+        clearTimeout(tapTimer);
+        tapTimer = setTimeout(() => { tapCount = 0; }, 2000);
+        const remaining = 7 - tapCount;
+        if (remaining > 0 && remaining <= 5) {
+            showToast(`開発者モードまであと ${remaining} 回です`);
+        }
+        if (tapCount >= 7) {
+            enableDebugMode();
+            tapCount = 0;
+        }
+    });
+
+    function enableDebugMode() {
+        DEBUG_SECTION.style.display = 'block';
+        localStorage.setItem('debugEnabled', 'true');
+        showToast('開発者モードが有効になりました！');
+    }
+    
+    function disableDebugMode() {
+        DEBUG_SECTION.style.display = 'none';
+        localStorage.removeItem('debugEnabled');
+        showToast('開発者モードを終了しました');
+    }
+
+    // --- ドラッグ移動処理 ---
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    let xOffset = 0;
+    let yOffset = 0;
+
+    DEBUG_HANDLE.addEventListener("mousedown", dragStart);
+    document.addEventListener("mouseup", dragEnd);
+    document.addEventListener("mousemove", drag);
+
+    // スマホ対応（タッチイベント）
+    DEBUG_HANDLE.addEventListener("touchstart", dragStart, {passive: false});
+    document.addEventListener("touchend", dragEnd);
+    document.addEventListener("touchmove", drag, {passive: false});
+
+    function dragStart(e) {
+        if (e.type === "touchstart") {
+            initialX = e.touches[0].clientX - xOffset;
+            initialY = e.touches[0].clientY - yOffset;
+        } else {
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
+        }
+
+        if (e.target === DEBUG_HANDLE) {
+            isDragging = true;
+        }
+    }
+
+    function dragEnd(e) {
+        initialX = currentX;
+        initialY = currentY;
+        isDragging = false;
+    }
+
+    function drag(e) {
+        if (isDragging) {
+            e.preventDefault();
+            if (e.type === "touchmove") {
+                currentX = e.touches[0].clientX - initialX;
+                currentY = e.touches[0].clientY - initialY;
+            } else {
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+            }
+
+            xOffset = currentX;
+            yOffset = currentY;
+
+            setTranslate(currentX, currentY, DEBUG_SECTION);
+        }
+    }
+
+    function setTranslate(xPos, yPos, el) {
+        el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+    }
+
+    // --- その他機能 ---
+    function resetCollection() {
+        Object.keys(unlockedStatus).forEach(key => unlockedStatus[key] = false);
+        localStorage.removeItem('mechMechCollection');
+        fossils.forEach(f => {
+            if (f.type === 'coming_soon') return;
+            const item = document.getElementById(`item-${f.id}`);
+            const tooltip = document.getElementById(`tooltip-${f.id}`);
+            item.classList.add('locked');
+            item.classList.remove('unlocked', 'just-unlocked', 'selected');
+            tooltip.innerHTML = f.hint; 
+        });
+        detailSection.style.display = 'none';
+        showToast('図鑑をリセットしました');
+    }
+    
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.innerText = message;
+        toast.classList.add('show');
+        setTimeout(() => { toast.classList.remove('show'); }, 2000);
+    }
+
+    function simulateNFC(id) {
+        if (!fossils.find(f => f.id === id) || unlockedStatus[id]) return;
+        unlockFossilEffect(id);
+    }
+
+    function unlockFossilEffect(id) {
+        const item = document.getElementById(`item-${id}`);
+        const data = fossils.find(f => f.id === id);
+        
+        const audio = document.getElementById('sfx-sparkle');
+        if(audio) { 
+            audio.currentTime = 0; audio.volume = 1.0;
+            audio.play().catch(e => {});
+        }
+
+        unlockedStatus[id] = true;
+        saveStatus();
+
+        document.getElementById(`tooltip-${id}`).innerHTML = data.desc;
+        
+        item.classList.remove('locked');
+        item.classList.add('unlocked', 'just-unlocked');
+        setTimeout(() => item.classList.remove('just-unlocked'), 600);
+        createSparkles(item);
+    }
+
+    function createSparkles(element) {
+        for(let i=0; i<20; i++) {
+            const sparkle = document.createElement('div');
+            sparkle.classList.add('sparkle-particle');
+            const angle = Math.random() * 360; 
+            const distance = 60 + Math.random() * 80;
+            const tx = Math.cos(angle * Math.PI / 180) * distance + 'px';
+            const ty = Math.sin(angle * Math.PI / 180) * distance + 'px';
+            sparkle.style.setProperty('--tx', tx);
+            sparkle.style.setProperty('--ty', ty);
+            sparkle.style.animationDelay = (Math.random() * 0.2) + 's';
+            element.appendChild(sparkle);
+            setTimeout(() => sparkle.remove(), 1000);
+        }
+    }
+</script>
+
+</body>
+</html>

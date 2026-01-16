@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="福井発！「メカメカほりほり」は、工学と恐竜を掛け合わせた新しい発掘体験イベントです。3Dプリンタで造形された化石を探し出し、スマホでスキャンしてデータベースを埋めよう！">
+    <title>メカメカほりほり | 掘り出せ！未来のエンジニア！</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00695C;
+            --secondary: #004D40;
+            --accent: #FFAB00;
+            --bg: #F9FAFB;
+            --text: #374151;
+            --text-light: #6B7280;
+        }
+        
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            background: var(--bg);
+            margin: 0; padding: 0; color: var(--text);
+            padding-top: 70px; line-height: 1.8;
+        }
+
+        /* ヘッダー */
+        .site-header {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 1000;
+        }
+        /* ロゴ：トップに戻る機能付き */
+        .header-logo {
+            font-weight: 900; color: var(--primary); font-size: 1.4rem; text-decoration: none; display: flex; align-items: center; cursor: pointer;
+        }
+        .header-nav a {
+            font-size: 0.95rem; color: var(--text); text-decoration: none; margin-left: 20px; font-weight: bold; transition: color 0.3s;
+        }
+        .header-nav a:hover { color: var(--accent); }
+
+        /* メインビジュアル */
+        .hero {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white; text-align: center; padding: 80px 20px; margin-bottom: 60px;
+        }
+        .hero h1 { font-size: 2.5rem; margin: 0 0 10px 0; letter-spacing: 0.05em; }
+        .hero p { font-size: 1.2rem; opacity: 0.9; margin: 0; font-weight: 700; }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 0 20px 80px; }
+
+        /* セクション共通 */
+        .section { margin-bottom: 80px; }
+        .section-title {
+            font-size: 1.8rem; color: var(--primary); text-align: center; margin-bottom: 40px; position: relative; display: inline-block; left: 50%; transform: translateX(-50%);
+        }
+        .section-title::after {
+            content: ""; display: block; width: 60px; height: 4px; background: var(--accent); margin: 10px auto 0; border-radius: 2px;
+        }
+
+        /* 文章レイアウト */
+        .text-block {
+            background: #fff; padding: 40px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.03); margin-bottom: 30px; text-align: justify;
+        }
+        .text-block h3 {
+            font-size: 1.3rem; color: var(--secondary); margin-top: 0; border-left: 5px solid var(--accent); padding-left: 15px;
+        }
+
+        /* 写真とテキストのレイアウト */
+        .feature-row { display: flex; align-items: center; gap: 40px; margin-bottom: 50px; }
+        .feature-row:nth-child(even) { flex-direction: row-reverse; }
+        .feature-image { flex: 1; max-width: 400px; }
+        .feature-image img { width: 100%; height: auto; border-radius: 15px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        .feature-text { flex: 1; }
+        .feature-text h4 { font-size: 1.4rem; color: var(--primary); margin: 0 0 15px 0; }
+        .step-badge { display: inline-block; background: var(--accent); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; margin-bottom: 10px; }
+
+        /* CTAセクション */
+        .cta-section {
+            text-align: center; background: #E0F2F1; padding: 60px 20px; border-radius: 30px; margin-top: 40px;
+        }
+        .cta-btn {
+            display: inline-block; background: var(--primary); color: white; font-size: 1.5rem; font-weight: bold; padding: 20px 60px; border-radius: 50px; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 10px 20px rgba(0,105,92,0.3); margin-top: 20px;
+        }
+        .cta-btn:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,105,92,0.4); background: var(--secondary); }
+
+        /* 上に戻るボタン */
+        .scroll-top-btn {
+            position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px;
+            background: var(--primary); color: #fff; border: none; border-radius: 50%;
+            font-size: 1.5rem; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer; z-index: 900; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.2s;
+        }
+        .scroll-top-btn.show { opacity: 1; pointer-events: auto; }
+        .scroll-top-btn:active { transform: scale(0.9); }
+
+        /* スマホ対応 */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 1.8rem; }
+            .feature-row, .feature-row:nth-child(even) { flex-direction: column; text-align: left; }
+            .feature-image { max-width: 100%; }
+            .text-block { padding: 25px; }
+        }
+
+        footer {
+            text-align: center; padding: 40px; color: var(--text-light); font-size: 0.9rem; background: #fff; margin-top: 60px;
+        }
+    </style>
+</head>
+<body>
+
+<header class="site-header">
+    <a href="#" class="header-logo" id="top-logo">🦖 メカメカほりほり</a>
+    <nav class="header-nav">
+        <a href="database.html">化石データベース</a>
+    </nav>
+</header>
+
+<div class="hero">
+    <h1>メカメカほりほり</h1>
+    <p>掘り出せ！未来のエンジニア！</p>
+</div>
+
+<div class="container">
+
+    <section class="section">
+        <h2 class="section-title">プロジェクトの成り立ち</h2>
+        <div class="text-block">
+            <h3>「理科離れ」を解決したい</h3>
+            <p>
+                「メカメカほりほり」は、近年問題となっている子どもたちの「理科離れ」という課題に取り組むことから始まりました。
+                ただ教科書を読むのではなく、遊びを通して自然に科学や技術に触れてほしい。そんな想いから、子どもたちに大人気の「恐竜」と、
+                ものづくりの象徴である「工学」を掛け合わせた、まったく新しい体験プログラムを考案しました。
+            </p>
+            <p>
+                本プロジェクトは、2025年の「福井発！ビジネスプランコンテスト」学生の部において、
+                「工学の認知」を目的としたプランとして提案されました。
+            </p>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">背景と目的</h2>
+        <div class="text-block">
+            <h3>工学 × 恐竜というテーマ</h3>
+            <p>
+                福井県は「恐竜王国」として有名ですが、私たちはそこに「3Dプリンタ」や「NFC（近距離無線通信）」といった最新技術を組み合わせました。
+                子どもたちが発掘体験を通して「この化石はどうやって作られたんだろう？」「スマホをかざすとなぜ情報が出るんだろう？」という
+                疑問を持つことが、工学への興味の入り口になります。
+            </p>
+            <p>
+                この体験がきっかけとなり、将来工学系の学校へ進学したり、理系人材として活躍する子どもたちが増えること。
+                そして彼らが次の世代へ科学の面白さを伝えていく、そんな「未来のエンジニア」を育てる循環を作ることを目指しています。
+            </p>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">体験内容</h2>
+        
+        <div class="feature-row">
+            <div class="feature-image">
+                <img src="images/step1_search.jpg" alt="化石を探している様子">
+            </div>
+            <div class="feature-text">
+                <span class="step-badge">STEP 1</span>
+                <h4>岩石を探し出そう</h4>
+                <p>
+                    まずは発掘現場（おがくずのプールや専用フィールド）の中から、化石が入った「岩」を探し出します。
+                    シャベルを使って掘り起こす体験は、まるで本物の古生物学者のよう！
+                    岩は企業から提供されたおがくずを活用した特別な素材で作られており、環境にも配慮しています。
+                </p>
+            </div>
+        </div>
+
+        <div class="feature-row">
+            <div class="feature-image">
+                <img src="images/step2_dig.jpg" alt="ハンマーとノミで発掘している様子">
+            </div>
+            <div class="feature-text">
+                <span class="step-badge">STEP 2</span>
+                <h4>ハンマーで発掘！</h4>
+                <p>
+                    見つけた岩を、ハンマーと鏨（たがね）を使って慎重に砕いていきます。
+                    中から出てくるのは、3Dプリンタで精密に造形された恐竜の化石。
+                    従来の体験とは違い、1つの岩に必ず1つの化石が入っているため、「何も見つからなかった」という悲しい思いはさせません。
+                </p>
+            </div>
+        </div>
+
+        <div class="feature-row">
+            <div class="feature-image">
+                <img src="images/step3_scan.jpg" alt="スマホでスキャンしている様子">
+            </div>
+            <div class="feature-text">
+                <span class="step-badge">STEP 3</span>
+                <h4>スマホで解析（スキャン）</h4>
+                <p>
+                    ここからが「メカメカほりほり」の真骨頂。掘り出した化石にはNFCタグが埋め込まれています。
+                    スマホをかざすと、その恐竜の詳しいデータや生態が画面に表示されます！
+                    「ただの石」が「情報の鍵」になる不思議な技術体験を通じて、工学の面白さを実感できます。
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div class="cta-section">
+        <h2>君だけのデータベースを作ろう！</h2>
+        <p>発掘した化石をスキャンして、デジタルデータベースに登録しよう。<br>君は何種類コンプリートできるかな？</p>
+        <a href="database.html" class="cta-btn">データベースにアクセス</a>
+    </div>
+
+</div>
+
+<button id="scroll-top-btn" class="scroll-top-btn">▲</button>
+
+<footer>
+    &copy; 2026 MechMechHoriHori Project.<br>
+    HaikaiLab
+</footer>
+
+<script>
+    // --- 滑らかスクロール機能 ---
+    const scrollTopBtn = document.getElementById('scroll-top-btn');
+    const topLogo = document.getElementById('top-logo');
+
+    // スクロール検知でボタン表示
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 200) {
+            scrollTopBtn.classList.add('show');
+        } else {
+            scrollTopBtn.classList.remove('show');
+        }
+    });
+
+    // トップへ滑らかに戻る関数
+    function scrollToTop(e) {
+        e.preventDefault();
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+
+    // イベント登録
+    if(scrollTopBtn) scrollTopBtn.addEventListener('click', scrollToTop);
+    if(topLogo) topLogo.addEventListener('click', scrollToTop);
+</script>
+
+</body>
+</html>
