@@ -162,7 +162,7 @@
         
         <div class="feature-row">
             <div class="feature-image">
-                <img src="images/step1_search.jpg" alt="化石を探している様子">
+                <img src="image/step1_search.jpg" alt="化石を探している様子">
             </div>
             <div class="feature-text">
                 <span class="step-badge">STEP 1</span>
@@ -177,7 +177,7 @@
 
         <div class="feature-row">
             <div class="feature-image">
-                <img src="images/step2_dig.jpg" alt="ハンマーとノミで発掘している様子">
+                <img src="image/step2_dig.jpg" alt="ハンマーとノミで発掘している様子">
             </div>
             <div class="feature-text">
                 <span class="step-badge">STEP 2</span>
@@ -192,7 +192,7 @@
 
         <div class="feature-row">
             <div class="feature-image">
-                <img src="images/step3_scan.jpg" alt="スマホでスキャンしている様子">
+                <img src="image/step3_scan.jpg" alt="スマホでスキャンしている様子">
             </div>
             <div class="feature-text">
                 <span class="step-badge">STEP 3</span>
@@ -222,20 +222,18 @@
 </footer>
 
 <script>
-    // --- 滑らかスクロール機能 ---
-    const scrollTopBtn = document.getElementById('scroll-top-btn');
-    const topLogo = document.getElementById('top-logo');
+    /**
+     * UI管理 (UI Management)
+     * DOM要素をキャッシュし、Nullチェックを行うことで安全性を高めています。
+     */
+    const ui = {
+        scrollTopBtn: document.getElementById('scroll-top-btn'),
+        topLogo: document.getElementById('top-logo')
+    };
 
-    // スクロール検知でボタン表示
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 200) {
-            scrollTopBtn.classList.add('show');
-        } else {
-            scrollTopBtn.classList.remove('show');
-        }
-    });
-
-    // トップへ滑らかに戻る関数
+    /**
+     * 滑らかスクロール機能
+     */
     function scrollToTop(e) {
         e.preventDefault();
         window.scrollTo({
@@ -244,9 +242,29 @@
         });
     }
 
-    // イベント登録
-    if(scrollTopBtn) scrollTopBtn.addEventListener('click', scrollToTop);
-    if(topLogo) topLogo.addEventListener('click', scrollToTop);
+    /**
+     * スクロール検知
+     * 200px以上スクロールしたらボタンを表示
+     */
+    function handleScroll() {
+        // 安全対策: ボタンが存在しない場合は処理を中断
+        if (!ui.scrollTopBtn) return;
+
+        if (window.scrollY > 200) {
+            ui.scrollTopBtn.classList.add('show');
+        } else {
+            ui.scrollTopBtn.classList.remove('show');
+        }
+    }
+
+    // --- イベントリスナー登録 ---
+    
+    // passive: true を指定して、スマホなどでのスクロール性能を向上させます
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // 要素が存在する場合のみイベントを追加（エラー防止）
+    if(ui.scrollTopBtn) ui.scrollTopBtn.addEventListener('click', scrollToTop);
+    if(ui.topLogo) ui.topLogo.addEventListener('click', scrollToTop);
 </script>
 
 </body>
