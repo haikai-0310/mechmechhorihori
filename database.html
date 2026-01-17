@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
 
     <style>
-        /* CSSは変更ありませんが、構造的に完成されているためそのまま維持します */
+        /* CSSに変更はありません */
         :root {
             --primary: #5D4037;
             --accent: #FFAB00; 
@@ -373,7 +373,7 @@
 <script>
     /**
      * データ定義 (Data Model)
-     * パスを 'image/' に修正済み
+     * 画像パスをすべて 'image/' に修正
      */
     const fossils = [
         { 
@@ -482,7 +482,7 @@
         localStorage.setItem(SAVE_KEY, JSON.stringify(unlockedStatus));
     }
 
-    // --- DOM要素のキャッシュ（Null安全性向上） ---
+    // --- DOM要素のキャッシュ ---
     const ui = {
         grid: document.getElementById('grid-container'),
         detail: {
@@ -502,7 +502,6 @@
 
     /**
      * ヘルパー関数: innerHTMLを使わずに改行付きテキストを設定
-     * 安全なDOM操作の要となる関数です
      */
     function setMultilineText(container, lines) {
         if (!container) return;
@@ -579,7 +578,6 @@
         const targetItem = document.getElementById(`item-${id}`);
         if(targetItem) targetItem.classList.add('selected');
 
-        // textContentを使用した安全なデータバインディング
         if(ui.detail.name) ui.detail.name.textContent = data.name;
         if(ui.detail.img) {
             ui.detail.img.src = data.img;
@@ -632,7 +630,7 @@
     }
 
     /**
-     * デバッグ・開発者モード (ドラッグ機能付き)
+     * デバッグ・開発者モード
      */
     let tapCount = 0;
     let tapTimer;
@@ -674,70 +672,11 @@
         localStorage.removeItem(DEBUG_KEY);
         showToast('開発者モードを終了しました');
     }
-
-    // ドラッグ移動処理
-    let isDragging = false;
-    let currentX;
-    let currentY;
-    let initialX;
-    let initialY;
-    let xOffset = 0;
-    let yOffset = 0;
-
-    if (DEBUG_HANDLE) {
-        DEBUG_HANDLE.addEventListener("mousedown", dragStart);
-        document.addEventListener("mouseup", dragEnd);
-        document.addEventListener("mousemove", drag);
-
-        DEBUG_HANDLE.addEventListener("touchstart", dragStart, {passive: false});
-        document.addEventListener("touchend", dragEnd);
-        document.addEventListener("touchmove", drag, {passive: false});
-    }
-
-    function dragStart(e) {
-        if (e.type === "touchstart") {
-            initialX = e.touches[0].clientX - xOffset;
-            initialY = e.touches[0].clientY - yOffset;
-        } else {
-            initialX = e.clientX - xOffset;
-            initialY = e.clientY - yOffset;
-        }
-
-        if (e.target === DEBUG_HANDLE) {
-            isDragging = true;
-        }
-    }
-
-    function dragEnd(e) {
-        initialX = currentX;
-        initialY = currentY;
-        isDragging = false;
-    }
-
-    function drag(e) {
-        if (isDragging) {
-            e.preventDefault();
-            if (e.type === "touchmove") {
-                currentX = e.touches[0].clientX - initialX;
-                currentY = e.touches[0].clientY - initialY;
-            } else {
-                currentX = e.clientX - initialX;
-                currentY = e.clientY - initialY;
-            }
-
-            xOffset = currentX;
-            yOffset = currentY;
-
-            if(DEBUG_SECTION) {
-                DEBUG_SECTION.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
-            }
-        }
-    }
-
-    // --- その他機能 ---
+    
     function resetCollection() {
         Object.keys(unlockedStatus).forEach(key => unlockedStatus[key] = false);
         localStorage.removeItem(SAVE_KEY); 
+
         fossils.forEach(f => {
             if (f.type === 'coming_soon') return;
             const item = document.getElementById(`item-${f.id}`);
@@ -799,6 +738,65 @@
             sparkle.style.animationDelay = (Math.random() * 0.2) + 's';
             element.appendChild(sparkle);
             setTimeout(() => sparkle.remove(), 1000);
+        }
+    }
+
+    // --- ドラッグ移動処理 ---
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    let xOffset = 0;
+    let yOffset = 0;
+
+    if (DEBUG_HANDLE) {
+        DEBUG_HANDLE.addEventListener("mousedown", dragStart);
+        document.addEventListener("mouseup", dragEnd);
+        document.addEventListener("mousemove", drag);
+
+        DEBUG_HANDLE.addEventListener("touchstart", dragStart, {passive: false});
+        document.addEventListener("touchend", dragEnd);
+        document.addEventListener("touchmove", drag, {passive: false});
+    }
+
+    function dragStart(e) {
+        if (e.type === "touchstart") {
+            initialX = e.touches[0].clientX - xOffset;
+            initialY = e.touches[0].clientY - yOffset;
+        } else {
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
+        }
+
+        if (e.target === DEBUG_HANDLE) {
+            isDragging = true;
+        }
+    }
+
+    function dragEnd(e) {
+        initialX = currentX;
+        initialY = currentY;
+        isDragging = false;
+    }
+
+    function drag(e) {
+        if (isDragging) {
+            e.preventDefault();
+            if (e.type === "touchmove") {
+                currentX = e.touches[0].clientX - initialX;
+                currentY = e.touches[0].clientY - initialY;
+            } else {
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+            }
+
+            xOffset = currentX;
+            yOffset = currentY;
+
+            if(DEBUG_SECTION) {
+                DEBUG_SECTION.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+            }
         }
     }
 </script>
